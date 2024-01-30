@@ -1,0 +1,51 @@
+stages:
+   - build
+   - deploy
+
+# build stage
+build_app:
+   image: node:alpine
+   stage: build
+   tags:
+    - build
+   only:
+      - dev
+   script:
+      - npm install --legacy-peer-deps
+      - npm run build 
+   cache:
+     paths:
+       - node_modules/
+   artifacts:
+      paths:
+         # build folder
+         - dist/
+      expire_in: 1 hour
+
+# production stage
+production:
+   stage: deploy
+   tags:
+    - deploy
+   only:
+      - dev
+   before_script:
+      - xcopy C:\inetpub\wwwroot\Sstu.Service.Frontend\web.config C:\Temp /e /h /r /y
+   script:
+      - xcopy dist C:\inetpub\wwwroot\Sstu.Service.Frontend /e /h /r /y
+      - xcopy C:\Temp\web.config C:\inetpub\wwwroot\Sstu.Service.Frontend /e /h /r /y
+
+production16:
+   stage: deploy
+   tags:
+    - deploy61
+   only:
+      - dev
+   before_script:
+      - xcopy C:\inetpub\wwwroot\Sstu.Service.Frontend\web.config C:\Temp /e /h /r /y
+      - C:\Windows\System32\inetsrv\AppCmd stop apppool "DefaultAppPool"
+   script:
+      - xcopy dist C:\inetpub\wwwroot\Sstu.Service.Frontend /e /h /r /y
+      - xcopy C:\Temp\web.config C:\inetpub\wwwroot\Sstu.Service.Frontend /e /h /r /y
+   after_script:
+      - C:\Windows\System32\inetsrv\AppCmd start apppool "DefaultAppPool"

@@ -1,0 +1,20 @@
+# base image
+FROM node:latest as build-stage
+
+ARG VUE_APP_LOCAL_URL=http://ip/
+ENV VUE_APP_LOCAL_URL ${VUE_APP_LOCAL_URL}
+
+# set working directory
+WORKDIR /app
+
+COPY ./package*.json ./
+RUN npm install --legacy-peer-deps
+COPY ./ .
+RUN npm run build
+
+# production stage
+FROM nginx as production-stage
+RUN mkdir /app
+COPY --from=build-stage /app/dist /app
+COPY nginx.conf /etc/nginx/nginx.conf
+

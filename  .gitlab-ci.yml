@@ -1,0 +1,20 @@
+stages:
+   - build
+
+# build stage
+build_app:
+   image: node:alpine
+   stage: build
+   only:
+      - dev
+   script:
+      - npm install --legacy-peer-deps
+      - npm run build 
+   cache:
+     paths:
+       - node_modules/
+   artifacts:
+      paths:
+         # build folder
+         - dist/
+      expire_in: 1 hour
